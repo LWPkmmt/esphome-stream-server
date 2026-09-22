@@ -46,6 +46,5 @@ async def to_code(config):
     await cg.register_component(var, config)
     await uart.register_uart_device(var, config)
 
-    esphome_version = parse_esphome_version()
-    if (2025, 12, 0) <= esphome_version < (2026, 3, 0):
+    if hasattr(uart, "request_wake_loop_on_rx"):
         uart.request_wake_loop_on_rx()
