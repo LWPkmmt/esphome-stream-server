@@ -158,7 +158,9 @@ void StreamServerComponent::flush() {
         iov[0].iov_len = std::min(this->buf_head_ - client.position, this->buf_ahead(client.position));
         iov[1].iov_base = &this->buf_[0];
         iov[1].iov_len = this->buf_head_ - (client.position + iov[0].iov_len);
-        int iovcnt = iov[1].iov_len > 0 ? 2 : 1;
+        // Pass only populated iovecs to writev(). The second iovec is only
+        // needed when the ring buffer wraps.
+        const int iovcnt = iov[1].iov_len != 0 ? 2 : 1;
         if ((written = client.socket->writev(iov, iovcnt)) > 0) {
             client.position += written;
         } else if (written == 0 || errno == ECONNRESET || errno == ENOTCONN || errno == EPIPE) {
